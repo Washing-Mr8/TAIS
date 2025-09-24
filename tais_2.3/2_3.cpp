@@ -22,6 +22,10 @@ hayamos terminado con todos los clientes podremos obtener como solucion la caja 
 COSTE: el coste de realizar pop() y top() es lineal O(1),e insertar un elemento en una cola de prioridad es de O(logN), por ello como iteramos
 C veces (C es el numero de clientes) el coste total es de ->O(C logN) 
 
+En realidad es O(N log N + C log N)
+
+Coste en espacio adicional : O(N) por el tamaño de la cola de prioridad
+
  @ </answer> */
 
 
