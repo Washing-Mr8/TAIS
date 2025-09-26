@@ -21,7 +21,7 @@ compararlos y que en caso de igualdad haya desempate por los strings. A su vez l
 leer los datos para que en cada iteracion y lectura actualicemos la cola atendiendo a los diferentes elementos (si ya esta insertado o no) y actualizando
 o insertando los datos
 
-COSTE: el coste de cada push o update es de O(logN), e iteramos para leer los datos E veces, siendo E el numero de eventos, y la cola tiene una tamaño de 
+COSTE: el coste de cada push o update es de O(logP), e iteramos para leer los datos E veces, siendo E el numero de eventos, y la cola tiene una tamaño de 
 P paises, asi que en el caso peor el coste total ascenderia a -> O(ElogP)
 
 COSTE EN ESPACIO ADICIONAL: O(P), siendo P el numero de paises
