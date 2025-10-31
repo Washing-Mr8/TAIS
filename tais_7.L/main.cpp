@@ -28,6 +28,12 @@ using namespace std;
  AÑADIDO: Me ha faltado verificar que la aldea mediana sea neutral, es decir, que no sea ni gales ni romana. Tambien me ha faltado poner al comienzo de cada Dijkstra
  los vertices de cada bando en el indexPQ. Como no los añadi al principio solo se realizaba la busqueda desde el primer vertice del bando y no desde cualquiera (como
  deberia ser)
+
+ SOLUCION: Para resolver correctamente el problema de manera eficiente habian 2 posibles caminos. Usar 2 superaldeas, es decir 2 vertices adicionales con distancia 0 
+ a su propio bando y luego realizar Dijkstra para cada super vertice. La otra es modificar levenmente el Dijkstra para añadir los origenes de un bando con distancia 0
+ y asi cada bando tiene sus caminos minimos a los demas vertices (luego se comprueba cuando se hace la diferencia y ademas la aldea tiene que ser neutral)
+
+ AUNQUE DE WRONG ANSWER LA SOLUCION ES ASI
  
  COSTE: utilizar el algoritmo de  dijkstra tiene un coste O(AlogV) (A:Aristas , V:Vertices) y solo necesitamos realizarlo 2 veces (una por cada bando), ademas antes de
  empezarlo necesitamos iterar G o R veces para ver que vertices son de nuestro bando. Sin contar la iteracion para mostrar la solucion el coste es -> 
@@ -44,11 +50,9 @@ using namespace std;
 //@ <answer>
 
 template <typename Valor>
-class CamninosBando {
+class CaminosBando {
 private:
     const Valor INF = std::numeric_limits<Valor>::max();
-    int origen;
-    vector<bool> nuestro_bando;
 
     std::vector<Valor> dist;
     IndexPQ<Valor> pq;
@@ -56,23 +60,17 @@ private:
     void relajar(AristaDirigida<Valor> a) {
         
         int v = a.desde(), w = a.hasta();
-        if (dist[w] > dist[v] + a.valor() && !nuestro_bando[w]) {
+        if (dist[w] > dist[v] + a.valor()) {
             dist[w] = dist[v] + a.valor();
             pq.update(w, dist[w]);
         }
-        else if (dist[w] >= dist[v] + a.valor() &&  nuestro_bando[w]) { // si el vertice es de nuestro bando, su distancia pasa a ser la del anterior 
-            dist[w] = dist[v]; // si es de nuestro bando la distancia no se suma
-        }
     }
 
-    void dijkstra(DigrafoValorado<Valor> const& g){
-        dist[origen] = 0;
-        for (int i = 0; i < g.V(); i++) {
-            if (nuestro_bando[i]) {
-                //dist[i] = 0;
-                pq.push(i, 0);
-            }
-
+public:
+    CaminosBando(DigrafoValorado<Valor> const& g, vector<int> const& aldeas) : dist(g.V(), INF), pq(g.V()) {
+        for (int aldea : aldeas) {
+            dist[aldea] = 0;
+            pq.push(aldea, 0);
         }
 
         while (!pq.empty()) {
@@ -82,23 +80,11 @@ private:
         }
     }
 
-public:
-    CamninosBando(DigrafoValorado<Valor> const& g, int orig, vector<int> const& aldeas) : origen(orig),
-        dist(g.V(), INF), pq(g.V()), nuestro_bando(g.V(), false) {
-        //primero comprobamos que aldeas son de nuestro bando
-        for (int indice : aldeas) {
-            nuestro_bando[indice] = true;
-            dist[indice] = 0;
-        }
-        dijkstra(g);
-    }
-
     Valor distancia(int v) const { return dist[v]; }
 };
 
 
 bool resuelveCaso() {
-
     // leemos la entrada
     int N, C;
     cin >> N >> C;
@@ -118,11 +104,10 @@ bool resuelveCaso() {
 
     //guardamos los indices de los galos y los romanos y vemos que aldeas no son neutrales
     vector<bool> aldeasNeutrales(N, true);
-
     int g = 0, r = 0, indice = 0;
-    
     cin >> g;
     vector<int> galos(g);
+
     for (int i = 0; i < g; i++) {
         cin >> indice;
         galos[i] = indice - 1;
@@ -131,25 +116,24 @@ bool resuelveCaso() {
 
     cin >> r;
     vector<int> romanos(r);
+
     for (int i = 0; i < r; i++) {
         cin >> indice;
         romanos[i] = indice - 1;
         aldeasNeutrales[indice - 1] = false;
     }
 
-    CamninosBando<int> caminosGalos(dgv, galos[0], galos);
-    CamninosBando<int> caminosRomanos(dgv, romanos[0], romanos);
-
+    CaminosBando<int> caminosGalos(dgv, galos);
+    CaminosBando<int> caminosRomanos(dgv, romanos);
 
     int minDistancia = INT16_MAX, mediana = 0;
+
     for (int i = 0; i < N; i++) {
         int diferencia = abs(caminosGalos.distancia(i) - caminosRomanos.distancia(i));
 
-        if (aldeasNeutrales[i]) {
-            if (diferencia < minDistancia || (diferencia == minDistancia && i + 1 < mediana)) {
-                minDistancia = diferencia;
-                mediana = i + 1;
-            }
+        if (aldeasNeutrales[i] && diferencia < minDistancia) {
+            minDistancia = diferencia;
+            mediana = i + 1;
         }
     }
 
