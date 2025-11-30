@@ -50,18 +50,18 @@ bool resuelveCaso() {
     if (N == 0) return false;
 
     vector<Pelicula> cartelera(N);
-    int hora = 0, minuto = 0, duracion = 0;
+    int dia = 0, hora = 0, minuto = 0, duracion = 0;
     char aux = ' ';
 
     for (int i = 0; i < N; i++) {
-        cin >> hora >> aux >> minuto >> duracion;
-        int inicio = hora * 60 + minuto;
+        cin >> dia >> hora >> aux >> minuto >> duracion;
+        int inicio = dia * 24 * 60 + hora * 60 + minuto;
         int fin = inicio + duracion;
 
         cartelera[i] = { inicio,fin };
     }
 
-    //ordenamos las pelicualas en funcion de cuanto terminan
+    //ordenamos las peliculas en funcion de cuanto terminan
 
     sort(cartelera.begin(), cartelera.end());
 
